@@ -4,7 +4,10 @@ use dioxus::prelude::*;
 pub fn TaskManager() -> Element {
     rsx! {
         div {
-            "task_manager.rs component"
+            h1 {
+                class: "",
+                "Task Manager Component"
+            }
         }
     }
 }
