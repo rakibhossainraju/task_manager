@@ -1,0 +1,40 @@
+[package]
+name = "task_manager"
+version = "0.1.0"
+authors = ["rakibhossainraju <rakibhossianraju@gmail.com>"]
+edition = "2024"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+uuid = {version = "1.18.1", features = ["v4", "js"] }
+serde = "1.0.228"
+serde_json = "1.0.145"
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+dioxus = { version = "0.7.0", features = ["web"] }
+web-sys = { version = "0.3.82", features = ["Storage", "Window"] }
+getrandom = { version = "0.3", features = ["wasm_js"] }
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+dioxus = { version = "0.7.0", features = ["desktop"] }
+dirs = "6.0.0"
+dioxus-desktop = "0.7.0"
+
+[features]
+default = ["web"]
+web = ["dioxus/web"]
+desktop = ["dioxus/desktop"]
+mobile = ["dioxus/mobile"]
+
+[profile]
+
+[profile.wasm-dev]
+inherits = "dev"
+opt-level = 1
+
+[profile.server-dev]
+inherits = "dev"
+
+[profile.android-dev]
+inherits = "dev"
