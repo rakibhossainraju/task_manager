@@ -1,0 +1,102 @@
+[
+    {
+        "id": 32342334234234,
+        "name": "Todo",
+        "description": "Tasks to be done",
+        "task_list": [
+            {
+                "id": 1,
+                "title": "Design homepage",
+                "description": "Create wireframes and mockups for the new homepage",
+                "priority": "High",
+                "created_at": "2024-06-01T10:00:00Z",
+                "updated_at": ""
+            },
+            {
+                "id": 2,
+                "title": "Set up database",
+                "description": "Install and configure PostgreSQL database",
+                "priority": "Medium",
+                "created_at": "2024-06-02T11:30:00Z",
+                "updated_at": null
+            }
+        ]
+    },
+    {
+        "id": 32342334234235,
+        "name": "Progress",
+        "description": "Tasks in progress",
+        "task_list": [
+            {
+                "id": 3,
+                "title": "Develop login feature",
+                "description": "Implement user authentication and authorization",
+                "priority": "High",
+                "created_at": "2024-06-03T09:15:00Z",
+                "updated_at": "2024-06-04T14:20:00Z"
+            },
+            {
+                "id": 4,
+                "title": "Create API endpoints",
+                "description": "Develop RESTful API for mobile app integration",
+                "priority": "Low",
+                "created_at": "2024-06-04T13:45:00Z",
+                "updated_at": null
+            },
+            {
+                "id": 5,
+                "title": "Write unit tests",
+                "description": "Create unit tests for the user module",
+                "priority": "Medium",
+                "created_at": "2024-06-05T08:00:00Z",
+                "updated_at": null
+            }
+        ]
+    },
+    {
+        "id": 32342334234236,
+        "name": "Done",
+        "description": "Completed tasks",
+        "task_list": [
+            {
+                "id": 6,
+                "title": "Set up project repository",
+                "description": "Initialize Git repository and set up CI/CD pipeline",
+                "priority": "High",
+                "created_at": "2024-05-30T15:00:00Z",
+                "updated_at": "2024-06-01T12:00:00Z"
+            },
+            {
+                "id": 7,
+                "title": "Conduct user research",
+                "description": "Gather user feedback through surveys and interviews",
+                "priority": "Medium",
+                "created_at": "2024-05-28T10:30:00Z",
+                "updated_at": "2024-05-31T16:45:00Z"
+            }
+        ]
+    },
+    {
+        "id": 32342334234237,
+        "name": "Backlog",
+        "description": "Tasks to be prioritized",
+        "task_list": [
+            {
+                "id": 8,
+                "title": "Research new technologies",
+                "description": "Explore emerging technologies for potential integration",
+                "priority": "Low",
+                "created_at": "2024-06-06T14:00:00Z",
+                "updated_at": null
+            },
+            {
+                "id": 9,
+                "title": "Plan marketing strategy",
+                "description": "Develop a comprehensive marketing plan for product launch",
+                "priority": "Medium",
+                "created_at": "2024-06-07T09:30:00Z",
+                "updated_at": null
+            }
+        ]
+    }
+]
