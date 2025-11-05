@@ -17,11 +17,7 @@ impl TasksGroupsState {
         let groups_data: TaskGroupsData =
             serde_json::from_str(json_str).expect("Failed to parse task_groups.json");
 
-        let mut groups: Vec<TaskGroup> = Vec::new();
-        for group_data in groups_data {
-            let group = TaskGroup::new(group_data);
-            groups.push(group);
-        }
+        let groups: Vec<TaskGroup> = groups_data.into_iter().map(TaskGroup::from).collect();
         Signal::new(groups)
     }
 }

@@ -18,15 +18,22 @@ pub struct TaskGroup {
     pub description: Option<String>,
     pub task_list: Tasks,
 }
+
+impl From<TaskGroupData> for TaskGroup {
+    fn from(data: TaskGroupData) -> Self {
+        Self::new(data)
+    }
+}
+
 impl TaskGroup {
     fn new(data: TaskGroupData) -> Self {
-        let task_list: Tasks = Signal::new(data.task_list.into_iter().map(Task::new).collect());
+        let task_list: Vec<Task> = data.task_list.into_iter().map(Task::from).collect();
 
         Self {
             id: data.id,
             name: data.name,
             description: data.description,
-            task_list,
+            task_list: Signal::new(task_list),
         }
     }
 }

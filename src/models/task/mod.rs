@@ -12,6 +12,12 @@ pub struct Task {
     pub task: Signal<TaskData>,
 }
 
+impl From<TaskData> for Task {
+    fn from(data: TaskData) -> Self {
+        Self::new(data)
+    }
+}
+
 impl Task {
     pub fn new(data: TaskData) -> Self {
         Self {
