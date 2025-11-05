@@ -1,6 +1,6 @@
 use std::fmt::{Display, Formatter};
 
-use chrono::Local;
+use chrono::{DateTime, Local};
 use dioxus::prelude::*;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -39,14 +39,14 @@ impl TaskPriority {
     }
 }
 
-#[derive(Debug, Props, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct TaskData {
     pub id: Uuid,
     pub title: String,
     pub description: Option<String>,
     pub priority: TaskPriority,
-    pub created_at: String,
-    pub updated_at: Option<String>,
+    pub created_at: DateTime<Local>,
+    pub updated_at: Option<DateTime<Local>>,
 }
 
 impl Default for TaskData {
@@ -56,7 +56,7 @@ impl Default for TaskData {
             title: "".into(),
             description: None,
             priority: TaskPriority::default(),
-            created_at: Local::now().to_string(),
+            created_at: Local::now(),
             updated_at: None,
         }
     }
