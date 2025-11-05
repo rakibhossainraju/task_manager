@@ -1,18 +1,17 @@
-use dioxus::{prelude::*};
+use dioxus::prelude::*;
 
-use crate::{components::TaskColumn, models::TaskGroups};
-
+use crate::{components::TaskColumn, models::TasksGroupsState};
 
 #[component]
 pub fn TaskManager() -> Element {
-    let task_groups = use_signal(TaskGroups::new);
+    let task_groups = use_signal(TasksGroupsState::new);
 
     let add_task_group = {
         let mut task_groups = task_groups.clone();
         move |_| {
-            task_groups.with_mut(|tg| {
-                tg.add_task_group("Todo".to_string());
-            });
+            // task_groups.with_mut(|tg| {
+            //     tg.add_task_group("Todo".to_string());
+            // });
         }
     };
     rsx! {
