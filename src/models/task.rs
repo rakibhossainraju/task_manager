@@ -39,7 +39,7 @@ impl TaskPriority {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Default, Debug, Serialize, Deserialize)]
 pub struct TaskData {
     pub id: Uuid,
     pub title: String,
@@ -49,18 +49,6 @@ pub struct TaskData {
     pub updated_at: Option<DateTime<Local>>,
 }
 
-impl Default for TaskData {
-    fn default() -> Self {
-        Self {
-            id: Uuid::new_v4(),
-            title: "".into(),
-            description: None,
-            priority: TaskPriority::default(),
-            created_at: Local::now(),
-            updated_at: None,
-        }
-    }
-}
 impl TaskData {
     pub fn new(
         id: Uuid,
