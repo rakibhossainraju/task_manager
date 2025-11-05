@@ -1,8 +1,10 @@
 use std::fmt::{Display, Formatter};
 
+use chrono::Local;
 use dioxus::prelude::*;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum TaskPriority {
     Low,
     Medium,
@@ -36,28 +38,35 @@ impl TaskPriority {
     }
 }
 
-
-#[derive(Debug, Props, Clone, PartialEq)]
-pub struct Task {
-    pub id: u128,
-    pub title: Signal<String>,
-    pub description: Signal<Option<String>>,
-    pub priority: Signal<TaskPriority>,
+#[derive(Debug, Props, Clone, PartialEq, Serialize, Deserialize)]
+pub struct TaskData {
+    pub title: String,
+    pub description: Option<String>,
+    pub priority: TaskPriority,
     pub created_at: String,
     pub updated_at: Option<String>,
 }
 
-impl Task {
-    pub fn new(id: u128, title: String) -> Self {
+impl Default for TaskData {
+    fn default() -> Self {
         Self {
-            id,
-            title: Signal::new(title),
-            description: Signal::new(None),
-            priority: Signal::new(TaskPriority::default()),
-            created_at: "2024-06-06T14:00:00Z".to_string(),
+            title: "Untitled Task".into(),
+            description: None,
+            priority: TaskPriority::default(),
+            created_at: Local::now().to_string(),
             updated_at: None,
         }
     }
+}
+
+#[derive(Debug, Props, Clone, PartialEq)]
+pub struct Task {
+    pub id: u128,
+    pub task: Signal<TaskData>,
+}
+
+impl Task {
+    pub fn new(id: u128, title: String) -> Self {}
     pub fn change_priority(&mut self) {
         let next_priority = (self.priority)().match_and_get_next();
         self.priority.set(next_priority);

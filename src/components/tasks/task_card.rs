@@ -1,6 +1,6 @@
-use dioxus::{html::dd, prelude::*};
+use dioxus::prelude::*;
 
-use crate::models::{Task, TaskPriority};
+use crate::models::Task;
 
 #[component]
 pub fn TaskCard(task: Task) -> Element {
