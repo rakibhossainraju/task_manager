@@ -29,7 +29,7 @@ impl Display for TaskPriority {
 }
 
 impl TaskPriority {
-    pub fn match_and_get_next(&self) -> TaskPriority {
+    pub fn toggle_priority(&self) -> TaskPriority {
         match self {
             TaskPriority::Low => TaskPriority::Medium,
             TaskPriority::Medium => TaskPriority::High,
