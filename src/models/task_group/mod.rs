@@ -1,0 +1,31 @@
+mod data;
+mod state;
+
+use dioxus::prelude::*;
+use uuid::Uuid;
+
+use crate::models::{Task, task_group::data::TaskGroupData};
+
+type TaskGroupsData = Vec<TaskGroupData>;
+
+pub type Tasks = Signal<Vec<Task>>;
+
+#[derive(Debug, Clone, PartialEq, Props)]
+pub struct TaskGroup {
+    pub id: Uuid,
+    pub name: String,
+    pub description: Option<String>,
+    pub task_list: Tasks,
+}
+impl TaskGroup {
+    fn new(data: TaskGroupData) -> Self {
+        let task_list: Tasks = Signal::new(data.task_list.into_iter().map(Task::new).collect());
+
+        Self {
+            id: data.id,
+            name: data.name,
+            description: data.description,
+            task_list,
+        }
+    }
+}
