@@ -5,6 +5,7 @@ use dioxus::prelude::*;
 use uuid::Uuid;
 
 use crate::models::{Task, task_group::data::TaskGroupData};
+pub use state::TasksGroupsState;
 
 type TaskGroupsData = Vec<TaskGroupData>;
 
