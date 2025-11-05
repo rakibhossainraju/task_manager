@@ -12,7 +12,7 @@ struct TaskGroupData {
     task_list: Vec<TaskData>,
 }
 
-type TasksGroupsData = Vec<TaskGroupData>;
+type TaskGroupsData = Vec<TaskGroupData>;
 
 pub type Tasks = Signal<Vec<Task>>;
 
@@ -42,15 +42,13 @@ pub struct TasksGroupsState {
 
 impl TasksGroupsState {
     pub fn new() -> Self {
-        Self::load_groups();
-
         Self {
             groups: Self::load_groups(),
         }
     }
     pub fn load_groups() -> Signal<Vec<TaskGroup>> {
         let json_str = include_str!("./task_groups.json");
-        let groups_data: TasksGroupsData =
+        let groups_data: TaskGroupsData =
             serde_json::from_str(json_str).expect("Failed to parse task_groups.json");
 
         let mut groups: Vec<TaskGroup> = Vec::new();
