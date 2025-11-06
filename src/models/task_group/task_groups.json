@@ -1,7 +1,7 @@
 [
   {
     "id": "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
-    "name": "Todo",
+    "title": "Todo",
     "description": "Tasks to be done",
     "task_list": [
       {
@@ -24,7 +24,7 @@
   },
   {
     "id": "d4e5f6a7-b8c9-4d0e-1f2a-3b4c5d6e7f8a",
-    "name": "Progress",
+    "title": "Progress",
     "description": "Tasks in progress",
     "task_list": [
       {
@@ -55,7 +55,7 @@
   },
   {
     "id": "b8c9d0e1-f2a3-4b4c-5d6e-7f8a9b0c1d2e",
-    "name": "Done",
+    "title": "Done",
     "description": "Completed tasks",
     "task_list": [
       {
@@ -78,7 +78,7 @@
   },
   {
     "id": "e1f2a3b4-c5d6-4e7f-8a9b-0c1d2e3f4a5b",
-    "name": "Backlog",
+    "title": "Backlog",
     "description": "Tasks to be prioritized",
     "task_list": [
       {
