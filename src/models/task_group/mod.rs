@@ -1,7 +1,6 @@
 mod data;
 mod state;
 
-use std::sync::Arc;
 use dioxus::prelude::*;
 use uuid::Uuid;
 
@@ -10,7 +9,7 @@ pub use state::TasksGroupsState;
 
 type TaskGroupsData = Vec<TaskGroupData>;
 
-pub type TasksType = Signal<Vec<Arc<Task>>>;
+pub type TasksType = Signal<Vec<Signal<Task>>>;
 
 #[derive(Debug, Clone, PartialEq, Props)]
 pub struct TaskGroup {
@@ -28,7 +27,7 @@ impl From<TaskGroupData> for TaskGroup {
 
 impl TaskGroup {
     fn new(data: TaskGroupData) -> Self {
-        let task_list: Vec<Arc<Task>> = data.task_list.into_iter().map(|t| Arc::new(Task::from(t))).collect();
+        let task_list: Vec<Signal<Task>> = data.task_list.into_iter().map(|t| Signal::new(Task::from(t))).collect();
 
         Self {
             id: data.id,
