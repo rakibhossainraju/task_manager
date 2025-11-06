@@ -29,15 +29,3 @@ impl TaskData {
         task
     }
 }
-
-impl TaskData {
-    pub fn update_title(&mut self, new_title: impl Into<String>) {
-        self.title = new_title.into();
-        self.updated_at = Some(chrono::Local::now());
-    }
-
-    pub fn toggle_priority(&mut self) {
-        self.priority = self.priority.toggle_priority();
-        self.updated_at = Some(Local::now());
-    }
-}
