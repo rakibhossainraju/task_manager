@@ -1,9 +1,9 @@
 use dioxus::prelude::*;
 
-use crate::models::{TaskData};
+use crate::models::Task;
 
 #[component]
-pub fn TaskCard(task_signal: Signal<TaskData>) -> Element {
+pub fn TaskCard(task_signal: Signal<Task>) -> Element {
     let task_read = task_signal.read();
     let title = task_read.title.as_str();
     let priority = &task_signal.read().priority;
