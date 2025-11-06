@@ -38,9 +38,6 @@ impl TaskData {
 
     pub fn toggle_priority(&mut self) {
         self.priority = self.priority.toggle_priority();
-        self.updated_at = Some(chrono::Local::now());
-    }
-    pub fn test(&self) {
-        println!("Test function called on TaskData with id: {}", self.id);
+        self.updated_at = Some(Local::now());
     }
 }
