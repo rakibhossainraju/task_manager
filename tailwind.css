@@ -1,1 +1,11 @@
 @import "tailwindcss";
+
+@theme {
+    /* COLORS */
+  --color-primary-dark: oklch(17.67% 0.011 260.64);
+  --color-primary: oklch(22.17% 0.008 264.39);
+
+  /* FONT FAMILY */
+  --font-fira-mono: "Fira Mono", monospace;
+  --font-sans: "Inter", sans-serif;
+}
