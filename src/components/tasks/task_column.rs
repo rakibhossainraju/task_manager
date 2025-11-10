@@ -27,4 +27,3 @@ pub fn TaskColumn(task_group: Signal<TaskGroup>) -> Element {
         }
     }
 }
-
