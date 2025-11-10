@@ -1,6 +1,9 @@
 use dioxus::prelude::*;
 
-use crate::{components::TaskColumn, models::TasksGroupsState};
+use crate::{
+    components::{Filter, TaskColumn},
+    models::TasksGroupsState,
+};
 
 #[component]
 pub fn TaskManager() -> Element {
@@ -10,13 +13,13 @@ pub fn TaskManager() -> Element {
         move |_| {
             let mut task_groups = task_groups.clone();
             task_groups.with_mut(|tg| {
-               tg.add_task_group("Test Group");
+                tg.add_task_group("Test Group");
             });
         }
     };
     info!("Re-Rendierng-The APP");
     rsx! {
-        h1 { class: "font-extrabold text-2xl mb-4", "Task Manager" }
+        Filter {}
         button {
             class: "bg-blue-500 text-white px-4 py-2 rounded mb-4",
             onclick: add_task_group,
