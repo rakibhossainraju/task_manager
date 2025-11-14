@@ -2,13 +2,12 @@ mod data;
 mod priority;
 
 use chrono::{DateTime, Local};
-use dioxus::prelude::*;
 use uuid::Uuid;
 
 pub use crate::models::task::data::TaskData;
 use crate::models::task::priority::TaskPriority;
 
-#[derive(Debug, Props, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Task {
     pub id: Uuid,
     pub title: String,

@@ -2,21 +2,33 @@ use dioxus::prelude::*;
 
 use crate::models::Task;
 
+#[derive(Props, Clone, PartialEq)]
+pub struct TaskCardProps {
+    task: Task,
+    group_id: uuid::Uuid,
+    #[props(default)]
+    on_title_change: Option<EventHandler<(uuid::Uuid, uuid::Uuid, String)>>,
+    #[props(default)]
+    on_toggle_priority: Option<EventHandler<(uuid::Uuid, uuid::Uuid)>>,
+}
+
 #[component]
-pub fn TaskCard(task_signal: Signal<Task>) -> Element {
-    let task_read = task_signal.read();
-    let title = task_read.title.as_str();
-    let priority = &task_signal.read().priority;
+pub fn TaskCard(props: TaskCardProps) -> Element {
+    let title = &props.task.title;
+    let priority = &props.task.priority;
 
     let handle_click = move |_| {
-        task_signal
-            .write()
-            .update_title("You have changed the title!");
+        if let Some(handler) = &props.on_title_change {
+            handler.call((props.group_id, props.task.id, "You have changed the title!".to_string()));
+        }
     };
+    
     let change_priority = move |_| {
-      task_signal.write().toggle_priority();
+        if let Some(handler) = &props.on_toggle_priority {
+            handler.call((props.group_id, props.task.id));
+        }
     };
-    info!("Re-Rendierng-card");
+    
     rsx! {
         div { class: "bg-white my-2 p-4 rounded shadow",
             h3 { onclick: handle_click, "{title}" }

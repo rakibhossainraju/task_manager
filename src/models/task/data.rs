@@ -13,19 +13,3 @@ pub struct TaskData {
     pub created_at: DateTime<Local>,
     pub updated_at: Option<DateTime<Local>>,
 }
-
-impl TaskData {
-    pub fn new(
-        id: Uuid,
-        title: String,
-        description: Option<String>,
-        priority: TaskPriority,
-    ) -> Self {
-        let mut task = Self::default();
-        task.id = id;
-        task.title = title;
-        task.description = description;
-        task.priority = priority;
-        task
-    }
-}
