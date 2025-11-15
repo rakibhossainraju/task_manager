@@ -1,9 +1,11 @@
+mod context;
 mod data;
 mod state;
 
 use uuid::Uuid;
 
 use crate::models::Task;
+pub use context::{TaskManagerContext, use_task_manager};
 pub use state::{TasksGroupsState, add_task_group, load_task_groups, update_group, update_task};
 
 pub(crate) type TaskGroupsData = Vec<data::TaskGroupData>;
