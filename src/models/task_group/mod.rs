@@ -40,6 +40,7 @@ impl TaskGroup {
         self.title = title.into();
     }
 
+    #[allow(dead_code)]
     pub fn add_task(&mut self, task: Task) {
         self.task_list.push(task);
     }
