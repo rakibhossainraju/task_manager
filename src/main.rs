@@ -1,7 +1,7 @@
 mod components;
 mod models;
 
-use components::TaskManager;
+use components::{TaskManager, TaskManagerProvider};
 use dioxus::prelude::*;
 
 // const FAVICON: Asset = asset!("/assets/favicon.ico");
@@ -36,6 +36,8 @@ fn App() -> Element {
         // document::Link { rel: "icon", href: FAVICON }
         document::Link { rel: "stylesheet", href: MAIN_CSS }
         document::Link { rel: "stylesheet", href: TAILWIND_CSS }
-        TaskManager {}
+        TaskManagerProvider {
+            TaskManager {}
+        }
     }
 }
