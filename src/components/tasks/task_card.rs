@@ -1,34 +1,39 @@
 use dioxus::prelude::*;
 
-use crate::models::Task;
+use crate::models::{Task, update_task, use_task_manager};
 
 #[derive(Props, Clone, PartialEq)]
 pub struct TaskCardProps {
     task: Task,
     group_id: uuid::Uuid,
-    #[props(default)]
-    on_title_change: Option<EventHandler<(uuid::Uuid, uuid::Uuid, String)>>,
-    #[props(default)]
-    on_toggle_priority: Option<EventHandler<(uuid::Uuid, uuid::Uuid)>>,
 }
 
 #[component]
 pub fn TaskCard(props: TaskCardProps) -> Element {
+    let ctx = use_task_manager();
+    let mut task_groups = ctx.task_groups;
     let title = &props.task.title;
     let priority = &props.task.priority;
+    let group_id = props.group_id;
+    let task_id = props.task.id;
 
     let handle_click = move |_| {
-        if let Some(handler) = &props.on_title_change {
-            handler.call((props.group_id, props.task.id, "You have changed the title!".to_string()));
-        }
+        task_groups.with_mut(|state| {
+            update_task(state, group_id, task_id, |t| {
+                t.update_title("You have changed the title!".to_string());
+            });
+        });
     };
-    
+
+    let mut task_groups2 = task_groups;
     let change_priority = move |_| {
-        if let Some(handler) = &props.on_toggle_priority {
-            handler.call((props.group_id, props.task.id));
-        }
+        task_groups2.with_mut(|state| {
+            update_task(state, group_id, task_id, |t| {
+                t.toggle_priority();
+            });
+        });
     };
-    
+
     rsx! {
         div { class: "bg-white my-2 p-4 rounded shadow",
             h3 { onclick: handle_click, "{title}" }
