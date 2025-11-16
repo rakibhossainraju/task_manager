@@ -14,7 +14,7 @@ pub fn TaskManager() -> Element {
         Filter {}
         div { class: "flex gap-4 mt-8 pb-2 overflow-x-auto",
             for group in task_groups.read().iter() {
-                TaskColumn { group: group.clone(), key: "group-{group.id}" }
+                TaskColumn { group_id: group.id, key: "group-{group.id}" }
             }
         }
     }
