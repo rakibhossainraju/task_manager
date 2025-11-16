@@ -16,7 +16,7 @@ fn main() {
             .with_always_on_top(true)
             .with_title("Task Manager");
 
-        dioxus::LaunchBuilder::new()
+        LaunchBuilder::new()
             .with_cfg(
                 desktop::Config::default()
                     .with_menu(None)
