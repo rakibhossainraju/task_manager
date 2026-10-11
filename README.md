@@ -1,3 +1,6 @@
+<img width="1896" height="1248" alt="MacBook Air" src="https://github.com/user-attachments/assets/a57fa933-ba21-4410-9f3e-47c6ec2b45a5" />
+
+
 # Development
 
 Your new jumpstart project includes basic organization with an organized `assets` folder and a `components` folder.
