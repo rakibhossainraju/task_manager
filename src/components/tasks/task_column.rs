@@ -5,24 +5,82 @@ use crate::{components::TaskCard, models::TaskGroup};
 #[component]
 pub fn TaskColumn(task_group: Signal<TaskGroup>) -> Element {
     let group = task_group.read();
+    let title = group.title.as_str();
+    let count = group.task_list.len();
 
-    let title = &group.title;
-    let description = group.description.as_deref().unwrap_or("");
-
-    let change_group_title = move |_| {
-        task_group.write().update_group_title("New Title!");
+    let (outer_color, inner_color) = match title.to_lowercase().as_str() {
+        "todo" => ("#00D492", "#004F3B"),
+        "progress" => ("#FB64B6", "#8B0836"),
+        "done" => ("#C27AFF", "#59168B"),
+        "deployed" => ("#FFB900", "#7B3306"),
+        _ => ("#8798B0", "#353A44"),
     };
 
-    info!("Re-Rendierng-column");
-
     rsx! {
-        div { class: "bg-stone-100 my-2 p-4 rounded",
-            div { class: "bg-stone-200 p-4 rounded",
-                h3 { class: "font-medium text-lg", onclick: change_group_title, "{title}" }
-                p { "{description}" }
+        div { class: "flex-1 min-w-[260px] w-full h-full bg-[#191B1F] rounded-[5px] flex flex-col justify-between overflow-hidden shadow-lg border border-[#22252A]/80",
+            // Column Header
+            div { class: "p-4 pb-3 shrink-0",
+                div { class: "flex items-center justify-between",
+                    div { class: "flex items-center gap-2.5",
+                        // Status double-ring
+                        div {
+                            class: "w-4 h-4 rounded-full flex items-center justify-center shrink-0",
+                            style: "background-color: {outer_color};",
+                            div {
+                                class: "w-2.5 h-2.5 rounded-full",
+                                style: "background-color: {inner_color};",
+                            }
+                        }
+                        // Column Title (bigger font)
+                        span { class: "text-white font-semibold text-lg tracking-tight", "{title}" }
+                        // Count Badge
+                        span { class: "w-5 h-5 rounded-full bg-[#353A44] text-[#F3F4F6] text-xs font-semibold flex items-center justify-center ml-0.5",
+                            "{count}"
+                        }
+                    }
+
+                    // Context Menu
+                    button {
+                        class: "p-1 text-[#4B4B4B] hover:text-[#8798B0] transition-colors cursor-pointer",
+                        title: "Column actions",
+                        svg {
+                            width: "16",
+                            height: "4",
+                            view_box: "0 0 16 4",
+                            fill: "none",
+                            circle { cx: "2", cy: "2", r: "2", fill: "#4B4B4B" }
+                            circle { cx: "8", cy: "2", r: "2", fill: "#4B4B4B" }
+                            circle { cx: "14", cy: "2", r: "2", fill: "#4B4B4B" }
+                        }
+                    }
+                }
+
+                // Subtitle (bigger font)
+                p { class: "text-[#989898] text-sm mt-1.5 font-normal", "This is a short description" }
             }
-            for task_signal in group.task_list.iter() {
-                TaskCard { task_signal: *task_signal, key: "{task_signal.read().id}" }
+
+            // Cards Container (takes remaining space and scrolls if needed)
+            div { class: "p-2.5 pt-1 flex flex-col gap-3 flex-1 overflow-y-auto min-h-0",
+                for task_signal in group.task_list.iter() {
+                    TaskCard { task_signal: *task_signal, key: "{task_signal.read().id}" }
+                }
+            }
+
+            // Footer "+ Add Item"
+            button { class: "w-full py-2.5 px-4 shrink-0 bg-[#4B4B4B]/40 hover:bg-[#4B4B4B]/60 text-[#8798B0] hover:text-[#F3F4F6] rounded-b-[5px] flex items-center gap-2.5 transition-colors cursor-pointer text-sm font-medium border-t border-[#22252A]/60",
+                svg {
+                    width: "14",
+                    height: "14",
+                    view_box: "0 0 14 14",
+                    fill: "none",
+                    path {
+                        d: "M7 1.5V12.5M1.5 7H12.5",
+                        stroke: "currentColor",
+                        stroke_width: "1.8",
+                        stroke_linecap: "round",
+                    }
+                }
+                span { "Add Item" }
             }
         }
     }

@@ -9,26 +9,19 @@ use crate::{
 pub fn TaskManager() -> Element {
     let task_groups = use_signal(TasksGroupsState::new);
 
-    let add_task_group = {
-        // move |_| {
-        //     let mut task_groups = task_groups.clone();
-        //     task_groups.with_mut(|tg| {
-        //         tg.add_task_group("Test Group");
-        //     });
-        // }
-    };
-    info!("Re-Rendierng-The APP");
     rsx! {
-        Filter {}
-        // button {
-        //     class: "bg-blue-500 text-white px-4 py-2 rounded mb-4",
-        //     onclick: add_task_group,
-        //     "+ Add Task Group"
-        // }
-        div {
-            // for group in task_groups.read().groups.iter() {
-            //     TaskColumn { task_group: group.clone() }
-            // }
+        div { class: "w-full h-screen bg-[#0E1116] flex flex-col font-sans select-none overflow-hidden",
+            // Action & Filter Toolbar
+            Filter {}
+
+            // Kanban Columns Board Container
+            main { class: "flex-1 px-6 pb-6 overflow-hidden w-full flex flex-col min-h-0",
+                div { class: "flex items-stretch gap-[19px] w-full flex-1 overflow-x-auto min-h-0",
+                    for group in task_groups.read().groups.read().iter() {
+                        TaskColumn { task_group: *group, key: "{group.read().id}" }
+                    }
+                }
+            }
         }
     }
 }

@@ -2,8 +2,14 @@
 
 @theme {
   /* COLORS */
-  --color-primary-dark: oklch(17.67% 0.011 260.64);
-  --color-primary: oklch(22.17% 0.008 264.39);
+  --color-canvas: #0E1116;
+  --color-titlebar: #222222;
+  --color-surface-column: #191B1F;
+  --color-surface-card: #22252A;
+  --color-accent-green: #00BC7D;
+  --color-accent-green-hover: #00D492;
+  --color-muted-border: #8798B0;
+  --color-muted-text: #989898;
 
   /* FONT FAMILY */
   --font-fira-mono: "Fira Mono", monospace;
