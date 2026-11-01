@@ -1,0 +1,26 @@
+{
+  "name": "task_manager",
+  "version": "1.0.0",
+  "description": "<img width=\"1896\" height=\"1248\" alt=\"image\" src=\"https://github.com/user-attachments/assets/33bae361-5e99-4661-8e09-a23dde84738e\" />",
+  "main": "index.js",
+  "scripts": {
+    "build:css": "tailwindcss -i ./tailwind.css -o ./assets/tailwind.css",
+    "watch:css": "tailwindcss -i ./tailwind.css -o ./assets/tailwind.css --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rakibhossainraju/task_manager.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/rakibhossainraju/task_manager/issues"
+  },
+  "homepage": "https://github.com/rakibhossainraju/task_manager#readme",
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.3",
+    "tailwindcss": "^4.3.3"
+  }
+}
