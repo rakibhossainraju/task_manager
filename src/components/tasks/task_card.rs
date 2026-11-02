@@ -2,7 +2,7 @@ use dioxus::prelude::*;
 use uuid::Uuid;
 
 use crate::{
-    components::DragContext,
+    components::{task_manager::EditingTask, DragContext},
     models::{BoardState, Task},
 };
 
@@ -10,6 +10,7 @@ use crate::{
 pub fn TaskCard(task: Task, group_id: Uuid) -> Element {
     let mut board = use_context::<Signal<BoardState>>();
     let mut drag_state = use_context::<DragContext>();
+    let mut editing_task = use_context::<Signal<EditingTask>>();
     let mut is_over = use_signal(|| false);
 
     let title = task.title.as_str();
@@ -36,6 +37,9 @@ pub fn TaskCard(task: Task, group_id: Uuid) -> Element {
         div {
             class: "group w-full min-h-[116px] bg-[#22252A] rounded-[12px] p-4 flex flex-col justify-between transition-all cursor-grab active:cursor-grabbing select-none border border-[#2D3139]/40 relative {drag_classes} {over_classes}",
             draggable: "true",
+            onclick: move |_| {
+                editing_task.set(EditingTask(Some(task_id)));
+            },
             ondragstart: move |e| {
                 e.stop_propagation();
                 drag_state.set(Some(task_id));
