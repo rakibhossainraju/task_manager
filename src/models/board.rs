@@ -203,4 +203,28 @@ mod tests {
         let filtered_none = board.filtered_tasks(group_id);
         assert_eq!(filtered_none.len(), 0);
     }
+
+    #[test]
+    fn test_add_task_priorities() {
+        let mut board = BoardState::new();
+        let group_id = board.groups[0].id;
+
+        for prio in [
+            TaskPriority::Low,
+            TaskPriority::Medium,
+            TaskPriority::High,
+            TaskPriority::Urgent,
+        ] {
+            let res = board.add_task(
+                group_id,
+                format!("Task {:?}", prio),
+                Some("Test desc".to_string()),
+                prio.clone(),
+            );
+            assert!(res.is_ok());
+            let task_id = res.unwrap();
+            let added_task = board.groups[0].tasks.iter().find(|t| t.id == task_id).unwrap();
+            assert_eq!(added_task.priority, prio);
+        }
+    }
 }
