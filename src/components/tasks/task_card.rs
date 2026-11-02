@@ -3,11 +3,10 @@ use dioxus::prelude::*;
 use crate::models::Task;
 
 #[component]
-pub fn TaskCard(task_signal: Signal<Task>) -> Element {
-    let task_read = task_signal.read();
-    let title = task_read.title.as_str();
-    let priority = &task_read.priority;
-    let description = task_read.description.as_deref().unwrap_or("This is a short description");
+pub fn TaskCard(task: Task) -> Element {
+    let title = task.title.as_str();
+    let priority = &task.priority;
+    let description = task.description.as_deref().unwrap_or("This is a short description");
     let (bg, border, text_color) = priority.colors();
 
     rsx! {
@@ -22,7 +21,6 @@ pub fn TaskCard(task_signal: Signal<Task>) -> Element {
             }
             div { class: "mt-3 text-[#989898] text-sm leading-relaxed space-y-1",
                 p { class: "truncate", "{description}" }
-                p { class: "truncate text-[#808080]", "This description des" }
             }
         }
     }

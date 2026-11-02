@@ -1,12 +1,21 @@
 use dioxus::prelude::*;
+use uuid::Uuid;
 
-use crate::{components::TaskCard, models::TaskGroup};
+use crate::{
+    components::TaskCard,
+    models::BoardState,
+};
 
 #[component]
-pub fn TaskColumn(task_group: Signal<TaskGroup>) -> Element {
-    let group = task_group.read();
+pub fn TaskColumn(group_id: Uuid) -> Element {
+    let board = use_context::<Signal<BoardState>>();
+    let board_read = board.read();
+    let Some(group) = board_read.groups.iter().find(|g| g.id == group_id) else {
+        return rsx! {};
+    };
     let title = group.title.as_str();
-    let count = group.task_list.len();
+    let tasks = board_read.filtered_tasks(group_id);
+    let count = tasks.len();
 
     let (outer_color, inner_color) = match title.to_lowercase().as_str() {
         "todo" => ("#00D492", "#004F3B"),
@@ -31,7 +40,7 @@ pub fn TaskColumn(task_group: Signal<TaskGroup>) -> Element {
                                 style: "background-color: {inner_color};",
                             }
                         }
-                        // Column Title (bigger font)
+                        // Column Title
                         span { class: "text-white font-semibold text-lg tracking-tight", "{title}" }
                         // Count Badge
                         span { class: "w-5 h-5 rounded-full bg-[#353A44] text-[#F3F4F6] text-xs font-semibold flex items-center justify-center ml-0.5",
@@ -55,14 +64,16 @@ pub fn TaskColumn(task_group: Signal<TaskGroup>) -> Element {
                     }
                 }
 
-                // Subtitle (bigger font)
-                p { class: "text-[#989898] text-sm mt-1.5 font-normal", "This is a short description" }
+                // Subtitle
+                p { class: "text-[#989898] text-sm mt-1.5 font-normal",
+                    "{group.description.as_deref().unwrap_or(\"This is a short description\")}"
+                }
             }
 
-            // Cards Container (takes remaining space and scrolls if needed)
+            // Cards Container
             div { class: "p-2.5 pt-1 flex flex-col gap-3 flex-1 overflow-y-auto min-h-0",
-                for task_signal in group.task_list.iter() {
-                    TaskCard { task_signal: *task_signal, key: "{task_signal.read().id}" }
+                for task in tasks.iter() {
+                    TaskCard { task: (*task).clone(), key: "{task.id}" }
                 }
             }
 
