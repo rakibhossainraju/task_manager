@@ -171,7 +171,9 @@ mod tests {
             )
             .unwrap();
 
+        assert!(board.filtered_tasks(group_id).iter().any(|t| t.id == task_id));
         assert!(board.delete_task(task_id));
+        assert!(!board.filtered_tasks(group_id).iter().any(|t| t.id == task_id));
         assert!(!board.delete_task(task_id)); // second delete returns false
     }
 
