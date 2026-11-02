@@ -72,8 +72,13 @@ pub fn TaskColumn(group_id: Uuid) -> Element {
 
             // Cards Container
             div { class: "p-2.5 pt-1 pb-3 flex flex-col gap-3 flex-1 overflow-y-auto min-h-0",
-                for task in tasks.iter() {
-                    TaskCard { task: (*task).clone(), key: "{task.id}" }
+                for (idx, task) in tasks.iter().enumerate() {
+                    TaskCard {
+                        task: (*task).clone(),
+                        group_id: group_id,
+                        index: idx,
+                        key: "{task.id}",
+                    }
                 }
             }
         }

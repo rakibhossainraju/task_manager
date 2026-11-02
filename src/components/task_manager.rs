@@ -1,13 +1,17 @@
 use dioxus::prelude::*;
+use uuid::Uuid;
 
 use crate::{
     components::{CreateTaskModal, Filter, TaskColumn},
     models::BoardState,
 };
 
+pub type DragContext = Signal<Option<Uuid>>;
+
 #[component]
 pub fn TaskManager() -> Element {
     let board = use_context_provider(|| Signal::new(BoardState::new()));
+    let _drag_context = use_context_provider(|| Signal::new(None::<Uuid>));
     let mut is_create_modal_open = use_signal(|| false);
 
     rsx! {
