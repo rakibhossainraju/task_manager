@@ -7,7 +7,7 @@ use crate::{
 };
 
 #[component]
-pub fn TaskCard(task: Task, group_id: Uuid, index: usize) -> Element {
+pub fn TaskCard(task: Task, group_id: Uuid) -> Element {
     let mut board = use_context::<Signal<BoardState>>();
     let mut drag_state = use_context::<DragContext>();
     let mut is_over = use_signal(|| false);
@@ -18,8 +18,9 @@ pub fn TaskCard(task: Task, group_id: Uuid, index: usize) -> Element {
     let (bg, border, text_color) = priority.colors();
     let task_id = task.id;
     let is_dragging = drag_state() == Some(task_id);
+    let is_drop_target = is_over() && drag_state().is_some() && drag_state() != Some(task_id);
 
-    let over_classes = if is_over() {
+    let over_classes = if is_drop_target {
         "border-t-2 border-t-[#00D492] ring-2 ring-[#00D492]/20"
     } else {
         ""
@@ -46,7 +47,7 @@ pub fn TaskCard(task: Task, group_id: Uuid, index: usize) -> Element {
             ondragover: move |e| {
                 e.prevent_default();
                 e.stop_propagation();
-                if !is_over() {
+                if drag_state() != Some(task_id) && !is_over() {
                     is_over.set(true);
                 }
             },
@@ -58,7 +59,7 @@ pub fn TaskCard(task: Task, group_id: Uuid, index: usize) -> Element {
                 e.stop_propagation();
                 is_over.set(false);
                 if let Some(dragged_id) = drag_state() {
-                    board.write().move_task(dragged_id, group_id, index);
+                    board.write().move_task(dragged_id, group_id, Some(task_id));
                     drag_state.set(None);
                 }
             },

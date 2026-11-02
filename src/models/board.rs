@@ -66,8 +66,13 @@ impl BoardState {
         &mut self,
         task_id: Uuid,
         target_group_id: Uuid,
-        target_index: usize,
+        target_task_id: Option<Uuid>,
     ) -> bool {
+        // Dropping onto itself is a safe no-op
+        if target_task_id == Some(task_id) {
+            return true;
+        }
+
         let mut source_info = None;
         for (g_idx, group) in self.groups.iter().enumerate() {
             if let Some(t_idx) = group.tasks.iter().position(|t| t.id == task_id) {
@@ -80,9 +85,16 @@ impl BoardState {
             return false;
         };
 
-        let target_exists = self.groups.iter().any(|g| g.id == target_group_id);
-        if !target_exists {
+        let target_group_opt = self.groups.iter().find(|g| g.id == target_group_id);
+        let Some(target_group) = target_group_opt else {
             return false;
+        };
+
+        // If target_task_id is specified, verify it exists in target_group
+        if let Some(target_tid) = target_task_id {
+            if !target_group.tasks.iter().any(|t| t.id == target_tid) {
+                return false;
+            }
         }
 
         let mut task = self.groups[source_g_idx].tasks.remove(source_t_idx);
@@ -94,8 +106,17 @@ impl BoardState {
             .find(|g| g.id == target_group_id)
             .expect("target group confirmed to exist");
 
-        let insert_idx = target_index.min(target_group.tasks.len());
-        target_group.tasks.insert(insert_idx, task);
+        if let Some(target_tid) = target_task_id {
+            let insert_pos = target_group
+                .tasks
+                .iter()
+                .position(|t| t.id == target_tid)
+                .unwrap_or(target_group.tasks.len());
+            target_group.tasks.insert(insert_pos, task);
+        } else {
+            target_group.tasks.push(task);
+        }
+
         true
     }
 
@@ -285,20 +306,41 @@ mod tests {
     }
 
     #[test]
-    fn test_move_task_intra_column() {
+    fn test_move_task_intra_column_downward() {
         let mut board = BoardState::new();
         let group_id = board.groups[0].id;
         let task0_id = board.groups[0].tasks[0].id;
         let task1_id = board.groups[0].tasks[1].id;
         let task2_id = board.groups[0].tasks[2].id;
+        let task3_id = board.groups[0].tasks[3].id;
 
-        // Move task 0 to index 2
-        let success = board.move_task(task0_id, group_id, 2);
+        // Move task 0 before task 2 (downward drag)
+        let success = board.move_task(task0_id, group_id, Some(task2_id));
         assert!(success);
         assert_eq!(board.groups[0].tasks.len(), 4);
         assert_eq!(board.groups[0].tasks[0].id, task1_id);
-        assert_eq!(board.groups[0].tasks[1].id, task2_id);
-        assert_eq!(board.groups[0].tasks[2].id, task0_id);
+        assert_eq!(board.groups[0].tasks[1].id, task0_id);
+        assert_eq!(board.groups[0].tasks[2].id, task2_id);
+        assert_eq!(board.groups[0].tasks[3].id, task3_id);
+    }
+
+    #[test]
+    fn test_move_task_intra_column_upward() {
+        let mut board = BoardState::new();
+        let group_id = board.groups[0].id;
+        let task0_id = board.groups[0].tasks[0].id;
+        let task1_id = board.groups[0].tasks[1].id;
+        let task2_id = board.groups[0].tasks[2].id;
+        let task3_id = board.groups[0].tasks[3].id;
+
+        // Move task 3 before task 1 (upward drag)
+        let success = board.move_task(task3_id, group_id, Some(task1_id));
+        assert!(success);
+        assert_eq!(board.groups[0].tasks.len(), 4);
+        assert_eq!(board.groups[0].tasks[0].id, task0_id);
+        assert_eq!(board.groups[0].tasks[1].id, task3_id);
+        assert_eq!(board.groups[0].tasks[2].id, task1_id);
+        assert_eq!(board.groups[0].tasks[3].id, task2_id);
     }
 
     #[test]
@@ -307,10 +349,11 @@ mod tests {
         let source_group_id = board.groups[0].id;
         let target_group_id = board.groups[1].id;
         let task_id = board.groups[0].tasks[0].id;
+        let target_first_task_id = board.groups[1].tasks[0].id;
         let source_initial_len = board.filtered_tasks(source_group_id).len();
         let target_initial_len = board.filtered_tasks(target_group_id).len();
 
-        let success = board.move_task(task_id, target_group_id, 0);
+        let success = board.move_task(task_id, target_group_id, Some(target_first_task_id));
         assert!(success);
         assert_eq!(board.filtered_tasks(source_group_id).len(), source_initial_len - 1);
         assert_eq!(board.filtered_tasks(target_group_id).len(), target_initial_len + 1);
@@ -319,16 +362,19 @@ mod tests {
     }
 
     #[test]
-    fn test_move_task_clamping_and_empty_column() {
+    fn test_move_task_empty_column_and_append() {
         let mut board = BoardState::new();
         let target_group_id = board.groups[3].id;
         let task_id = board.groups[0].tasks[0].id;
 
-        // Move with out-of-bounds target index (999)
-        let success = board.move_task(task_id, target_group_id, 999);
+        // Explicitly clear group 3 to test true empty column drop
+        board.groups[3].tasks.clear();
+        assert_eq!(board.groups[3].tasks.len(), 0);
+
+        let success = board.move_task(task_id, target_group_id, None);
         assert!(success);
-        let target_group = board.groups.iter().find(|g| g.id == target_group_id).unwrap();
-        assert_eq!(target_group.tasks.last().map(|t| t.id), Some(task_id));
+        assert_eq!(board.groups[3].tasks.len(), 1);
+        assert_eq!(board.groups[3].tasks[0].id, task_id);
     }
 
     #[test]
@@ -338,14 +384,17 @@ mod tests {
         let real_task_id = board.groups[0].tasks[0].id;
         let fake_id = Uuid::new_v4();
 
-        // Nonexistent task
-        assert!(!board.move_task(fake_id, real_group_id, 0));
+        // Nonexistent source task
+        assert!(!board.move_task(fake_id, real_group_id, None));
 
         // Nonexistent target group (task must NOT be lost from source group)
         let initial_tasks_count = board.groups[0].tasks.len();
-        assert!(!board.move_task(real_task_id, fake_id, 0));
+        assert!(!board.move_task(real_task_id, fake_id, None));
         assert_eq!(board.groups[0].tasks.len(), initial_tasks_count);
         assert_eq!(board.groups[0].tasks[0].id, real_task_id);
+
+        // Nonexistent target task in real target group
+        assert!(!board.move_task(real_task_id, real_group_id, Some(fake_id)));
     }
 
     #[test]
@@ -354,8 +403,8 @@ mod tests {
         let group_id = board.groups[0].id;
         let task_id = board.groups[0].tasks[1].id;
 
-        // Moving to its existing index
-        assert!(board.move_task(task_id, group_id, 1));
+        // Moving onto itself is a safe no-op
+        assert!(board.move_task(task_id, group_id, Some(task_id)));
         assert_eq!(board.groups[0].tasks[1].id, task_id);
     }
 }

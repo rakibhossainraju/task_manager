@@ -28,7 +28,7 @@ pub fn TaskColumn(group_id: Uuid) -> Element {
         _ => ("#8798B0", "#353A44"),
     };
 
-    let col_highlight = if is_col_over() {
+    let col_highlight = if is_col_over() && drag_state().is_some() {
         "ring-1 ring-[#00D492]/40"
     } else {
         ""
@@ -95,8 +95,7 @@ pub fn TaskColumn(group_id: Uuid) -> Element {
                     e.prevent_default();
                     is_col_over.set(false);
                     if let Some(dragged_id) = drag_state() {
-                        let target_len = board.read().filtered_tasks(group_id).len();
-                        board.write().move_task(dragged_id, group_id, target_len);
+                        board.write().move_task(dragged_id, group_id, None);
                         drag_state.set(None);
                     }
                 },
@@ -106,11 +105,10 @@ pub fn TaskColumn(group_id: Uuid) -> Element {
                         p { class: "text-xs text-[#8798B0]/50 font-medium", "Drop tasks here" }
                     }
                 }
-                for (idx, task) in tasks.iter().enumerate() {
+                for task in tasks.iter() {
                     TaskCard {
                         task: (*task).clone(),
                         group_id: group_id,
-                        index: idx,
                         key: "{task.id}",
                     }
                 }
