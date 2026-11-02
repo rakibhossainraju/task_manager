@@ -52,6 +52,68 @@ impl BoardState {
         Ok(task_id)
     }
 
+    pub fn update_task(
+        &mut self,
+        task_id: Uuid,
+        title: String,
+        description: Option<String>,
+        priority: TaskPriority,
+        target_group_id: Option<Uuid>,
+    ) -> Result<(), &'static str> {
+        let trimmed_title = title.trim();
+        if trimmed_title.is_empty() {
+            return Err("Task title cannot be empty");
+        }
+
+        // Find task across all groups
+        let mut source_info = None;
+        for (g_idx, group) in self.groups.iter().enumerate() {
+            if let Some(t_idx) = group.tasks.iter().position(|t| t.id == task_id) {
+                source_info = Some((g_idx, t_idx));
+                break;
+            }
+        }
+
+        let Some((source_g_idx, source_t_idx)) = source_info else {
+            return Err("Task not found");
+        };
+
+        let current_group_id = self.groups[source_g_idx].id;
+
+        // If target_group_id is specified and differs from current group
+        if let Some(target_gid) = target_group_id {
+            if target_gid != current_group_id {
+                let target_exists = self.groups.iter().any(|g| g.id == target_gid);
+                if !target_exists {
+                    return Err("Target group not found");
+                }
+
+                let mut task = self.groups[source_g_idx].tasks.remove(source_t_idx);
+                task.title = trimmed_title.to_string();
+                task.description = description;
+                task.priority = priority;
+                task.updated_at = Some(Local::now());
+
+                let target_group = self
+                    .groups
+                    .iter_mut()
+                    .find(|g| g.id == target_gid)
+                    .expect("target group confirmed to exist");
+
+                target_group.tasks.push(task);
+                return Ok(());
+            }
+        }
+
+        // Otherwise update in-place
+        let task = &mut self.groups[source_g_idx].tasks[source_t_idx];
+        task.title = trimmed_title.to_string();
+        task.description = description;
+        task.priority = priority;
+        task.updated_at = Some(Local::now());
+        Ok(())
+    }
+
     pub fn delete_task(&mut self, task_id: Uuid) -> bool {
         for group in &mut self.groups {
             if let Some(pos) = group.tasks.iter().position(|t| t.id == task_id) {
@@ -406,5 +468,87 @@ mod tests {
         // Moving onto itself is a safe no-op
         assert!(board.move_task(task_id, group_id, Some(task_id)));
         assert_eq!(board.groups[0].tasks[1].id, task_id);
+    }
+
+    #[test]
+    fn test_update_task_success() {
+        let mut board = BoardState::new();
+        let task_id = board.groups[0].tasks[0].id;
+
+        let res = board.update_task(
+            task_id,
+            "Updated Title".to_string(),
+            Some("Updated Description".to_string()),
+            TaskPriority::Urgent,
+            None,
+        );
+        assert!(res.is_ok());
+
+        let task = board.groups[0].tasks.iter().find(|t| t.id == task_id).unwrap();
+        assert_eq!(task.title, "Updated Title");
+        assert_eq!(task.description.as_deref(), Some("Updated Description"));
+        assert_eq!(task.priority, TaskPriority::Urgent);
+        assert!(task.updated_at.is_some());
+    }
+
+    #[test]
+    fn test_update_task_group_movement() {
+        let mut board = BoardState::new();
+        let target_group_id = board.groups[1].id;
+        let task_id = board.groups[0].tasks[0].id;
+        let source_len = board.groups[0].tasks.len();
+        let target_len = board.groups[1].tasks.len();
+
+        let res = board.update_task(
+            task_id,
+            "Moved Task".to_string(),
+            None,
+            TaskPriority::High,
+            Some(target_group_id),
+        );
+        assert!(res.is_ok());
+
+        assert_eq!(board.groups[0].tasks.len(), source_len - 1);
+        assert_eq!(board.groups[1].tasks.len(), target_len + 1);
+        let moved = board.groups[1].tasks.iter().find(|t| t.id == task_id).unwrap();
+        assert_eq!(moved.title, "Moved Task");
+        assert_eq!(moved.priority, TaskPriority::High);
+    }
+
+    #[test]
+    fn test_update_task_validation_and_errors() {
+        let mut board = BoardState::new();
+        let task_id = board.groups[0].tasks[0].id;
+        let fake_id = Uuid::new_v4();
+
+        // Empty title
+        let empty_res = board.update_task(
+            task_id,
+            "   ".to_string(),
+            None,
+            TaskPriority::Low,
+            None,
+        );
+        assert!(empty_res.is_err());
+
+        // Nonexistent task
+        let fake_task_res = board.update_task(
+            fake_id,
+            "Valid Title".to_string(),
+            None,
+            TaskPriority::Low,
+            None,
+        );
+        assert!(fake_task_res.is_err());
+
+        // Nonexistent target group
+        let fake_group_res = board.update_task(
+            task_id,
+            "Valid Title".to_string(),
+            None,
+            TaskPriority::Low,
+            Some(fake_id),
+        );
+        assert!(fake_group_res.is_err());
     }
 }
