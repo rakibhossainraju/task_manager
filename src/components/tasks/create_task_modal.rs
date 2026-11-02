@@ -59,29 +59,36 @@ pub fn CreateTaskModal(mut is_open: Signal<bool>) -> Element {
         is_open.set(false);
     };
 
-    let handle_keydown = move |e: KeyboardEvent| {
-        match e.key() {
-            Key::Escape => {
-                error_msg.set(None);
-                is_open.set(false);
-            }
-            Key::Enter => {
-                submit_task();
-            }
-            _ => {}
+    let handle_backdrop_keydown = move |e: KeyboardEvent| {
+        if e.key() == Key::Escape {
+            error_msg.set(None);
+            is_open.set(false);
+        }
+    };
+
+    let handle_title_keydown = move |e: KeyboardEvent| {
+        if e.key() == Key::Enter {
+            submit_task();
+        }
+    };
+
+    let handle_desc_keydown = move |e: KeyboardEvent| {
+        if e.key() == Key::Enter && (e.modifiers().ctrl() || e.modifiers().meta()) {
+            submit_task();
         }
     };
 
     rsx! {
         // Fullscreen Backdrop
         div {
-            class: "fixed inset-0 bg-black/70 backdrop-blur-xs flex items-center justify-center z-50 p-4 select-none",
+            class: "fixed inset-0 bg-black/70 backdrop-blur-xs flex items-center justify-center z-50 p-4 select-none outline-none",
+            tabindex: "0",
             onclick: handle_close,
+            onkeydown: handle_backdrop_keydown,
             // Modal Card Box
             div {
                 class: "bg-[#191B1F] border border-[#2B303A] rounded-[10px] w-full max-w-lg shadow-2xl p-6 flex flex-col gap-4 text-[#F3F4F6] relative",
                 onclick: move |e| e.stop_propagation(),
-                onkeydown: handle_keydown,
 
                 // Header
                 div { class: "flex items-center justify-between pb-2 border-b border-[#2B303A]",
@@ -119,6 +126,7 @@ pub fn CreateTaskModal(mut is_open: Signal<bool>) -> Element {
                         placeholder: "What needs to be done?",
                         value: "{title}",
                         autofocus: true,
+                        onkeydown: handle_title_keydown,
                         oninput: move |e| {
                             title.set(e.data.value());
                             if error_msg().is_some() {
@@ -135,6 +143,7 @@ pub fn CreateTaskModal(mut is_open: Signal<bool>) -> Element {
                         class: "w-full bg-[#14161A] text-[#F3F4F6] text-sm rounded-[5px] px-3.5 py-2 outline-none border border-[#2B303A] focus:border-[#00BC7D] transition-colors resize-none h-20 placeholder:text-[#525B6A]",
                         placeholder: "Add details or context (optional)...",
                         value: "{description}",
+                        onkeydown: handle_desc_keydown,
                         oninput: move |e| description.set(e.data.value()),
                     }
                 }
