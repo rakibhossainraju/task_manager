@@ -2,13 +2,16 @@ use dioxus::prelude::*;
 use uuid::Uuid;
 
 use crate::{
-    components::TaskCard,
+    components::{DragContext, TaskCard},
     models::BoardState,
 };
 
 #[component]
 pub fn TaskColumn(group_id: Uuid) -> Element {
-    let board = use_context::<Signal<BoardState>>();
+    let mut board = use_context::<Signal<BoardState>>();
+    let mut drag_state = use_context::<DragContext>();
+    let mut is_col_over = use_signal(|| false);
+
     let board_read = board.read();
     let Some(group) = board_read.groups.iter().find(|g| g.id == group_id) else {
         return rsx! {};
@@ -25,8 +28,14 @@ pub fn TaskColumn(group_id: Uuid) -> Element {
         _ => ("#8798B0", "#353A44"),
     };
 
+    let col_highlight = if is_col_over() {
+        "ring-1 ring-[#00D492]/40"
+    } else {
+        ""
+    };
+
     rsx! {
-        div { class: "flex-1 min-w-[260px] w-full h-full bg-[#191B1F] rounded-[5px] flex flex-col justify-between overflow-hidden shadow-lg border border-[#22252A]/80",
+        div { class: "flex-1 min-w-[260px] w-full h-full bg-[#191B1F] rounded-[5px] flex flex-col justify-between overflow-hidden shadow-lg border border-[#22252A]/80 {col_highlight}",
             // Column Header
             div { class: "p-4 pb-3 shrink-0",
                 div { class: "flex items-center justify-between",
@@ -70,8 +79,33 @@ pub fn TaskColumn(group_id: Uuid) -> Element {
                 }
             }
 
-            // Cards Container
-            div { class: "p-2.5 pt-1 pb-3 flex flex-col gap-3 flex-1 overflow-y-auto min-h-0",
+            // Cards Container & Drop Zone
+            div {
+                class: "p-2.5 pt-1 pb-3 flex flex-col gap-3 flex-1 overflow-y-auto min-h-0",
+                ondragover: move |e| {
+                    e.prevent_default();
+                    if !is_col_over() {
+                        is_col_over.set(true);
+                    }
+                },
+                ondragleave: move |_| {
+                    is_col_over.set(false);
+                },
+                ondrop: move |e| {
+                    e.prevent_default();
+                    is_col_over.set(false);
+                    if let Some(dragged_id) = drag_state() {
+                        let target_len = board.read().filtered_tasks(group_id).len();
+                        board.write().move_task(dragged_id, group_id, target_len);
+                        drag_state.set(None);
+                    }
+                },
+                if count == 0 {
+                    div {
+                        class: "flex-1 flex flex-col items-center justify-center min-h-[90px] border-2 border-dashed border-[#2D3139]/40 rounded-[10px] text-center select-none",
+                        p { class: "text-xs text-[#8798B0]/50 font-medium", "Drop tasks here" }
+                    }
+                }
                 for (idx, task) in tasks.iter().enumerate() {
                     TaskCard {
                         task: (*task).clone(),
