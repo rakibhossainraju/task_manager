@@ -117,8 +117,12 @@ impl BoardState {
                     .as_deref()
                     .map(|d| d.to_lowercase().contains(&query))
                     .unwrap_or(false);
-                let priority_str = format!("{}", task.priority).to_lowercase();
-                let priority_matches = priority_str.contains(&query);
+                let priority_matches = match task.priority {
+                    TaskPriority::Low => "low".contains(&query),
+                    TaskPriority::Medium => "medium".contains(&query) || "mid".contains(&query),
+                    TaskPriority::High => "high".contains(&query),
+                    TaskPriority::Urgent => "urgent".contains(&query),
+                };
 
                 title_matches || desc_matches || priority_matches
             })
@@ -218,6 +222,36 @@ mod tests {
         board.set_search_query("nonexistentxyz123".to_string());
         let filtered_none = board.filtered_tasks(group_id);
         assert_eq!(filtered_none.len(), 0);
+    }
+
+    #[test]
+    fn test_search_filtering_medium_priority() {
+        let mut board = BoardState::new();
+        let group_id = board.groups[0].id;
+        board
+            .add_task(
+                group_id,
+                "Feature Alpha Task".to_string(),
+                None,
+                TaskPriority::Medium,
+            )
+            .unwrap();
+
+        board.set_search_query("medium".to_string());
+        assert!(
+            board
+                .filtered_tasks(group_id)
+                .iter()
+                .any(|t| t.title == "Feature Alpha Task")
+        );
+
+        board.set_search_query("mid".to_string());
+        assert!(
+            board
+                .filtered_tasks(group_id)
+                .iter()
+                .any(|t| t.title == "Feature Alpha Task")
+        );
     }
 
     #[test]

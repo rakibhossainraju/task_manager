@@ -31,7 +31,7 @@ pub fn TaskColumn(group_id: Uuid) -> Element {
         _ => ("#8798B0", "#353A44"),
     };
 
-    let handle_add = move |_| {
+    let mut submit_task = move || {
         let title_val = new_title.read().clone();
         let desc_val = new_desc.read().clone();
         let desc_opt = if desc_val.trim().is_empty() {
@@ -54,12 +54,20 @@ pub fn TaskColumn(group_id: Uuid) -> Element {
         }
     };
 
-    let handle_cancel = move |_| {
+    let mut cancel_task = move || {
         new_title.set(String::new());
         new_desc.set(String::new());
         new_priority.set(TaskPriority::Low);
         error_msg.set(None);
         is_adding.set(false);
+    };
+
+    let handle_keydown = move |e: KeyboardEvent| {
+        match e.key() {
+            Key::Escape => cancel_task(),
+            Key::Enter => submit_task(),
+            _ => {}
+        }
     };
 
     rsx! {
@@ -114,19 +122,23 @@ pub fn TaskColumn(group_id: Uuid) -> Element {
                 }
 
                 if is_adding() {
-                    div { class: "p-3 bg-[#22252A] rounded-[10px] border border-[#353A44] flex flex-col gap-2.5 shadow-md shrink-0",
+                    div {
+                        class: "p-3 bg-[#22252A] rounded-[10px] border border-[#353A44] flex flex-col gap-2.5 shadow-md shrink-0",
+                        onkeydown: handle_keydown,
                         input {
                             class: "w-full bg-[#191B1F] text-[#F3F4F6] text-sm rounded-[4px] px-2.5 py-1.5 outline-none border border-[#353A44] focus:border-[#8798B0]",
                             placeholder: "Task title...",
                             value: "{new_title}",
                             autofocus: true,
                             oninput: move |e| new_title.set(e.data.value()),
+                            onkeydown: handle_keydown,
                         }
                         input {
                             class: "w-full bg-[#191B1F] text-[#F3F4F6] text-xs rounded-[4px] px-2.5 py-1.5 outline-none border border-[#353A44] focus:border-[#8798B0]",
                             placeholder: "Description (optional)...",
                             value: "{new_desc}",
                             oninput: move |e| new_desc.set(e.data.value()),
+                            onkeydown: handle_keydown,
                         }
                         div { class: "flex items-center justify-between gap-2 pt-1",
                             select {
@@ -150,13 +162,13 @@ pub fn TaskColumn(group_id: Uuid) -> Element {
                                 button {
                                     class: "px-2.5 py-1 text-xs text-[#8798B0] hover:text-[#F3F4F6] transition-colors cursor-pointer rounded",
                                     r#type: "button",
-                                    onclick: handle_cancel,
+                                    onclick: move |_| cancel_task(),
                                     "Cancel"
                                 }
                                 button {
                                     class: "px-3 py-1 text-xs font-medium text-white bg-[#00BC7D] hover:bg-[#00D492] rounded transition-colors cursor-pointer shadow-sm",
                                     r#type: "button",
-                                    onclick: handle_add,
+                                    onclick: move |_| submit_task(),
                                     "Add"
                                 }
                             }
