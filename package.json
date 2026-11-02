@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build:css": "tailwindcss -i ./tailwind.css -o ./assets/tailwind.css",
-    "watch:css": "tailwindcss -i ./tailwind.css -o ./assets/tailwind.css --watch"
+    "watch:css": "tailwindcss -i ./tailwind.css -o ./assets/tailwind.css --watch",
+    "dev": "dx serve --web"
   },
   "repository": {
     "type": "git",

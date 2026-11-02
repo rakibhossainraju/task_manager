@@ -12,27 +12,7 @@ pub fn Filter(on_add_task: EventHandler) -> Element {
                 Input {}
             }
 
-            // Action Buttons: Add Task
-            div { class: "flex items-center gap-3",
-                button {
-                    class: "h-[39px] px-4 bg-[#00BC7D] hover:bg-[#00D492] text-white text-sm font-medium rounded-[4px] shadow-sm transition-colors cursor-pointer flex items-center gap-2",
-                    r#type: "button",
-                    onclick: move |_| on_add_task.call(()),
-                    svg {
-                        width: "14",
-                        height: "14",
-                        view_box: "0 0 14 14",
-                        fill: "none",
-                        stroke: "currentColor",
-                        stroke_width: "2",
-                        stroke_linecap: "round",
-                        path { d: "M7 1V13M1 7H13" }
-                    }
-                    span { "Add Task" }
-                }
-            }
-
-            // View Controls & Add Column
+            // Controls & Action Buttons
             div { class: "flex items-center gap-3",
                 div { class: "flex items-center gap-2",
                     // Kanban Board View Button (Active)
@@ -88,6 +68,24 @@ pub fn Filter(on_add_task: EventHandler) -> Element {
                         path { d: "M7 1V13M1 7H13" }
                     }
                     span { "Add New Column" }
+                }
+
+                // Add Task Button (placed right after Add New Column)
+                button {
+                    class: "h-[39px] px-4 bg-[#00BC7D] hover:bg-[#00D492] text-white text-sm font-medium rounded-[4px] shadow-sm transition-colors cursor-pointer flex items-center gap-2",
+                    r#type: "button",
+                    onclick: move |_| on_add_task.call(()),
+                    svg {
+                        width: "14",
+                        height: "14",
+                        view_box: "0 0 14 14",
+                        fill: "none",
+                        stroke: "currentColor",
+                        stroke_width: "2",
+                        stroke_linecap: "round",
+                        path { d: "M7 1V13M1 7H13" }
+                    }
+                    span { "Add Task" }
                 }
             }
         }
