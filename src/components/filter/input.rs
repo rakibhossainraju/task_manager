@@ -1,10 +1,13 @@
 use dioxus::prelude::*;
 
+use crate::models::BoardState;
+
 const SEARCH_ICON: &str = include_str!("../../../assets/icons/search-icon.svg");
 
 #[component]
 pub fn Input() -> Element {
-    let mut input_value = use_signal(String::new);
+    let mut board = use_context::<Signal<BoardState>>();
+    let search_query = board.read().search_query.clone();
 
     rsx! {
         div { class: "flex items-center gap-2.5 px-3.5 h-[40px] w-full bg-[#191B1F] rounded-[4px] border border-[#2B303A]/60 shadow-sm focus-within:border-[#8798B0] transition-colors",
@@ -16,14 +19,14 @@ pub fn Input() -> Element {
                 input {
                     class: "w-full bg-transparent text-[#F3F4F6] text-sm outline-none border-none py-1 placeholder-transparent",
                     r#type: "text",
-                    value: "{input_value}",
+                    value: "{search_query}",
                     oninput: move |e| {
-                        input_value.set(e.data.value());
+                        board.write().set_search_query(e.data.value());
                     },
                 }
                 span {
                     class: {
-                        let visibility_class = if input_value.read().is_empty() {
+                        let visibility_class = if search_query.is_empty() {
                             "visible"
                         } else {
                             "invisible"
@@ -40,6 +43,28 @@ pub fn Input() -> Element {
                     " or "
                     b { class: "font-fira-mono font-medium text-[#D1D5DB]", "description" }
                     "..."
+                }
+            }
+            if !search_query.is_empty() {
+                button {
+                    class: "text-[#8798B0] hover:text-[#F3F4F6] transition-colors p-1 cursor-pointer shrink-0",
+                    title: "Clear search",
+                    r#type: "button",
+                    onclick: move |_| {
+                        board.write().set_search_query(String::new());
+                    },
+                    svg {
+                        width: "14",
+                        height: "14",
+                        view_box: "0 0 24 24",
+                        fill: "none",
+                        stroke: "currentColor",
+                        stroke_width: "2",
+                        stroke_linecap: "round",
+                        stroke_linejoin: "round",
+                        line { x1: "18", y1: "6", x2: "6", y2: "18" }
+                        line { x1: "6", y1: "6", x2: "18", y2: "18" }
+                    }
                 }
             }
         }

@@ -1,19 +1,14 @@
 use std::fmt::{Display, Formatter};
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
 pub enum TaskPriority {
+    #[default]
     Low,
     #[serde(alias = "Mid")]
     Medium,
     High,
     Urgent,
-}
-
-impl Default for TaskPriority {
-    fn default() -> Self {
-        TaskPriority::Low
-    }
 }
 
 impl Display for TaskPriority {
@@ -38,6 +33,7 @@ impl TaskPriority {
         }
     }
 
+    #[allow(dead_code)]
     pub fn toggle_priority(&self) -> TaskPriority {
         match self {
             TaskPriority::Low => TaskPriority::Medium,

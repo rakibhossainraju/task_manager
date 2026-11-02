@@ -1,12 +1,24 @@
 use dioxus::prelude::*;
+use uuid::Uuid;
 
-use crate::{components::TaskCard, models::TaskGroup};
+use crate::{
+    components::{DragContext, TaskCard},
+    models::BoardState,
+};
 
 #[component]
-pub fn TaskColumn(task_group: Signal<TaskGroup>) -> Element {
-    let group = task_group.read();
+pub fn TaskColumn(group_id: Uuid) -> Element {
+    let mut board = use_context::<Signal<BoardState>>();
+    let mut drag_state = use_context::<DragContext>();
+    let mut is_col_over = use_signal(|| false);
+
+    let board_read = board.read();
+    let Some(group) = board_read.groups.iter().find(|g| g.id == group_id) else {
+        return rsx! {};
+    };
     let title = group.title.as_str();
-    let count = group.task_list.len();
+    let tasks = board_read.filtered_tasks(group_id);
+    let count = tasks.len();
 
     let (outer_color, inner_color) = match title.to_lowercase().as_str() {
         "todo" => ("#00D492", "#004F3B"),
@@ -16,8 +28,14 @@ pub fn TaskColumn(task_group: Signal<TaskGroup>) -> Element {
         _ => ("#8798B0", "#353A44"),
     };
 
+    let col_highlight = if is_col_over() && drag_state().is_some() {
+        "ring-1 ring-[#00D492]/40"
+    } else {
+        ""
+    };
+
     rsx! {
-        div { class: "flex-1 min-w-[260px] w-full h-full bg-[#191B1F] rounded-[5px] flex flex-col justify-between overflow-hidden shadow-lg border border-[#22252A]/80",
+        div { class: "flex-1 min-w-[260px] w-full h-full bg-[#191B1F] rounded-[5px] flex flex-col justify-between overflow-hidden shadow-lg border border-[#22252A]/80 {col_highlight}",
             // Column Header
             div { class: "p-4 pb-3 shrink-0",
                 div { class: "flex items-center justify-between",
@@ -31,7 +49,7 @@ pub fn TaskColumn(task_group: Signal<TaskGroup>) -> Element {
                                 style: "background-color: {inner_color};",
                             }
                         }
-                        // Column Title (bigger font)
+                        // Column Title
                         span { class: "text-white font-semibold text-lg tracking-tight", "{title}" }
                         // Count Badge
                         span { class: "w-5 h-5 rounded-full bg-[#353A44] text-[#F3F4F6] text-xs font-semibold flex items-center justify-center ml-0.5",
@@ -55,32 +73,45 @@ pub fn TaskColumn(task_group: Signal<TaskGroup>) -> Element {
                     }
                 }
 
-                // Subtitle (bigger font)
-                p { class: "text-[#989898] text-sm mt-1.5 font-normal", "This is a short description" }
-            }
-
-            // Cards Container (takes remaining space and scrolls if needed)
-            div { class: "p-2.5 pt-1 flex flex-col gap-3 flex-1 overflow-y-auto min-h-0",
-                for task_signal in group.task_list.iter() {
-                    TaskCard { task_signal: *task_signal, key: "{task_signal.read().id}" }
+                // Subtitle
+                p { class: "text-[#989898] text-sm mt-1.5 font-normal",
+                    "{group.description.as_deref().unwrap_or(\"This is a short description\")}"
                 }
             }
 
-            // Footer "+ Add Item"
-            button { class: "w-full py-2.5 px-4 shrink-0 bg-[#4B4B4B]/40 hover:bg-[#4B4B4B]/60 text-[#8798B0] hover:text-[#F3F4F6] rounded-b-[5px] flex items-center gap-2.5 transition-colors cursor-pointer text-sm font-medium border-t border-[#22252A]/60",
-                svg {
-                    width: "14",
-                    height: "14",
-                    view_box: "0 0 14 14",
-                    fill: "none",
-                    path {
-                        d: "M7 1.5V12.5M1.5 7H12.5",
-                        stroke: "currentColor",
-                        stroke_width: "1.8",
-                        stroke_linecap: "round",
+            // Cards Container & Drop Zone
+            div {
+                class: "p-2.5 pt-1 pb-3 flex flex-col gap-3 flex-1 overflow-y-auto min-h-0",
+                ondragover: move |e| {
+                    e.prevent_default();
+                    if !is_col_over() {
+                        is_col_over.set(true);
+                    }
+                },
+                ondragleave: move |_| {
+                    is_col_over.set(false);
+                },
+                ondrop: move |e| {
+                    e.prevent_default();
+                    is_col_over.set(false);
+                    if let Some(dragged_id) = drag_state() {
+                        board.write().move_task(dragged_id, group_id, None);
+                        drag_state.set(None);
+                    }
+                },
+                if count == 0 {
+                    div {
+                        class: "flex-1 flex flex-col items-center justify-center min-h-[90px] border-2 border-dashed border-[#2D3139]/40 rounded-[10px] text-center select-none",
+                        p { class: "text-xs text-[#8798B0]/50 font-medium", "Drop tasks here" }
                     }
                 }
-                span { "Add Item" }
+                for task in tasks.iter() {
+                    TaskCard {
+                        task: (*task).clone(),
+                        group_id: group_id,
+                        key: "{task.id}",
+                    }
+                }
             }
         }
     }

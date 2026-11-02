@@ -1,14 +1,12 @@
-mod data;
-mod priority;
+pub mod priority;
 
 use chrono::{DateTime, Local};
-use dioxus::prelude::*;
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-pub use crate::models::task::data::TaskData;
-use crate::models::task::priority::TaskPriority;
+pub use priority::TaskPriority;
 
-#[derive(Debug, Props, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Task {
     pub id: Uuid,
     pub title: String,
@@ -18,30 +16,15 @@ pub struct Task {
     pub updated_at: Option<DateTime<Local>>,
 }
 
-impl From<TaskData> for Task {
-    fn from(data: TaskData) -> Self {
-        Self::new(data)
-    }
-}
-
 impl Task {
-    pub fn new(data: TaskData) -> Self {
+    pub fn new(title: String, description: Option<String>, priority: TaskPriority) -> Self {
         Self {
-            id: data.id,
-            title: data.title,
-            description: data.description,
-            priority: data.priority,
-            created_at: data.created_at,
-            updated_at: data.updated_at,
+            id: Uuid::new_v4(),
+            title,
+            description,
+            priority,
+            created_at: Local::now(),
+            updated_at: None,
         }
-    }
-    pub fn update_title(&mut self, new_title: impl Into<String>) {
-        self.title = new_title.into();
-        self.updated_at = Some(Local::now());
-    }
-
-    pub fn toggle_priority(&mut self) {
-        self.priority = self.priority.toggle_priority();
-        self.updated_at = Some(Local::now());
     }
 }
