@@ -8,3 +8,5 @@
 **/*.rs.bk
 
 /assets/tailwind.css
+__pycache__/
+*.pyc

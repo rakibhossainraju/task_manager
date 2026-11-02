@@ -1,0 +1,17 @@
+{
+  "skill_name": "design-system-creator",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Inspect our project stack and establish the visual design system and brand philosophy for Habit Lens. We want a calm, analytical, reflective, and trustworthy experience for personal wellbeing tracking (Next.js App Router + Tailwind CSS + shadcn/ui). Generate BRAND_PHILOSOPHY.md and DESIGN.md, then update AGENTS.md to bind future AI coding sessions.",
+      "expected_output": "Analyzes the Next.js/Tailwind/shadcn stack, asks high-impact vibe questions if needed, outputs BRAND_PHILOSOPHY.md (WHY) and DESIGN.md (HOW with CSS variables and Tailwind tokens), and updates AGENTS.md with mandatory design rules.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "We are building a technical, precise developer analytics tool using Vanilla HTML/CSS. Use the design-system-creator skill to establish our brand philosophy and design system, outputting BRAND_PHILOSOPHY.md, DESIGN.md with CSS custom properties, and binding rules in AGENTS.md.",
+      "expected_output": "Detects Vanilla CSS context, generates BRAND_PHILOSOPHY.md focused on technical minimalism, DESIGN.md with native CSS custom properties and grid/flex layout math, and links both files inside AGENTS.md.",
+      "files": []
+    }
+  ]
+}
