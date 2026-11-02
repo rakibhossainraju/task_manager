@@ -4,7 +4,7 @@ use dioxus::prelude::*;
 pub use input::Input;
 
 #[component]
-pub fn Filter() -> Element {
+pub fn Filter(on_add_task: EventHandler) -> Element {
     rsx! {
         div { class: "w-full px-[23.5px] py-5 flex items-center justify-between gap-4 flex-wrap",
             // Search Input
@@ -12,15 +12,23 @@ pub fn Filter() -> Element {
                 Input {}
             }
 
-            // Action Buttons (Discard / Save)
+            // Action Buttons: Add Task
             div { class: "flex items-center gap-3",
                 button {
-                    class: "w-[88px] h-[39px] bg-[#191B1F] hover:bg-[#22252A] text-[#F3F4F6] text-sm font-medium rounded-[4px] transition-colors cursor-pointer flex items-center justify-center",
-                    "Discard"
-                }
-                button {
-                    class: "w-[72px] h-[39px] bg-[#00BC7D] hover:bg-[#00D492] text-white text-sm font-medium rounded-[4px] shadow-sm transition-colors cursor-pointer flex items-center justify-center",
-                    "Save"
+                    class: "h-[39px] px-4 bg-[#00BC7D] hover:bg-[#00D492] text-white text-sm font-medium rounded-[4px] shadow-sm transition-colors cursor-pointer flex items-center gap-2",
+                    r#type: "button",
+                    onclick: move |_| on_add_task.call(()),
+                    svg {
+                        width: "14",
+                        height: "14",
+                        view_box: "0 0 14 14",
+                        fill: "none",
+                        stroke: "currentColor",
+                        stroke_width: "2",
+                        stroke_linecap: "round",
+                        path { d: "M7 1V13M1 7H13" }
+                    }
+                    span { "Add Task" }
                 }
             }
 

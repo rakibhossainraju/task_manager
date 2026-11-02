@@ -1,18 +1,21 @@
 use dioxus::prelude::*;
 
 use crate::{
-    components::{Filter, TaskColumn},
+    components::{CreateTaskModal, Filter, TaskColumn},
     models::BoardState,
 };
 
 #[component]
 pub fn TaskManager() -> Element {
     let board = use_context_provider(|| Signal::new(BoardState::new()));
+    let mut is_create_modal_open = use_signal(|| false);
 
     rsx! {
-        div { class: "w-full h-screen bg-[#0E1116] flex flex-col font-sans select-none overflow-hidden",
+        div { class: "w-full h-screen bg-[#0E1116] flex flex-col font-sans select-none overflow-hidden relative",
             // Action & Filter Toolbar
-            Filter {}
+            Filter {
+                on_add_task: move |_| is_create_modal_open.set(true),
+            }
 
             // Kanban Columns Board Container
             main { class: "flex-1 px-6 pb-6 overflow-hidden w-full flex flex-col min-h-0",
@@ -21,6 +24,11 @@ pub fn TaskManager() -> Element {
                         TaskColumn { group_id: group.id, key: "{group.id}" }
                     }
                 }
+            }
+
+            // Root-Level Create Task Modal
+            if is_create_modal_open() {
+                CreateTaskModal { is_open: is_create_modal_open }
             }
         }
     }
