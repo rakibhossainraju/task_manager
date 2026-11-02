@@ -41,7 +41,7 @@ pub fn TaskManager() -> Element {
 
             // Root-Level Edit Task Modal
             if let Some(task_id) = editing_task().0 {
-                EditTaskModal { task_id }
+                EditTaskModal { task_id, key: "{task_id}" }
             }
         }
     }

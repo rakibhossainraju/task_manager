@@ -160,48 +160,64 @@ pub fn EditTaskModal(task_id: Uuid) -> Element {
                     }
                 }
 
-                // Status Column & Priority Row
-                div { class: "grid grid-cols-2 gap-3",
-                    // Status Column Select
-                    div { class: "flex flex-col gap-1.5",
-                        label { class: "text-xs font-semibold text-[#8798B0] uppercase tracking-wider", "Status Column" }
-                        select {
-                            class: "w-full bg-[#14161A] text-[#F3F4F6] text-sm rounded-[5px] px-3 py-2 outline-none border border-[#2B303A] focus:border-[#00BC7D] cursor-pointer",
-                            value: "{selected_group_id}",
-                            onchange: move |e| {
-                                if let Ok(parsed_id) = Uuid::parse_str(&e.data.value()) {
-                                    selected_group_id.set(parsed_id);
-                                }
-                            },
-                            for group in groups.iter() {
-                                option {
-                                    value: "{group.id}",
-                                    selected: group.id == selected_group_id(),
-                                    "{group.title}"
-                                }
+                // Status Column Select
+                div { class: "flex flex-col gap-1.5",
+                    label { class: "text-xs font-semibold text-[#8798B0] uppercase tracking-wider", "Status Column" }
+                    select {
+                        class: "w-full bg-[#14161A] text-[#F3F4F6] text-sm rounded-[5px] px-3 py-2 outline-none border border-[#2B303A] focus:border-[#00BC7D] cursor-pointer",
+                        value: "{selected_group_id}",
+                        onchange: move |e| {
+                            if let Ok(parsed_id) = Uuid::parse_str(&e.data.value()) {
+                                selected_group_id.set(parsed_id);
+                            }
+                        },
+                        for group in groups.iter() {
+                            option {
+                                value: "{group.id}",
+                                selected: group.id == selected_group_id(),
+                                "{group.title}"
                             }
                         }
                     }
+                }
 
-                    // Priority Select
-                    div { class: "flex flex-col gap-1.5",
-                        label { class: "text-xs font-semibold text-[#8798B0] uppercase tracking-wider", "Priority" }
-                        select {
-                            class: "w-full bg-[#14161A] text-[#F3F4F6] text-sm rounded-[5px] px-3 py-2 outline-none border border-[#2B303A] focus:border-[#00BC7D] cursor-pointer",
-                            value: "{priority}",
-                            onchange: move |e| {
-                                let prio = match e.data.value().as_str() {
-                                    "Urgent" => TaskPriority::Urgent,
-                                    "High" => TaskPriority::High,
-                                    "Mid" | "Medium" => TaskPriority::Medium,
-                                    _ => TaskPriority::Low,
+                // Priority Buttons Row
+                div { class: "flex flex-col gap-1.5",
+                    label { class: "text-xs font-semibold text-[#8798B0] uppercase tracking-wider", "Priority" }
+                    div { class: "grid grid-cols-4 gap-2",
+                        {
+                            [
+                                TaskPriority::Low,
+                                TaskPriority::Medium,
+                                TaskPriority::High,
+                                TaskPriority::Urgent,
+                            ]
+                            .into_iter()
+                            .map(|p| {
+                                let is_active = priority() == p;
+                                let (bg, border, text_color) = p.colors();
+                                let style_str = if is_active {
+                                    format!("background-color: {}; border-color: {}; color: {};", bg, border, text_color)
+                                } else {
+                                    "background-color: #14161A; border-color: #2B303A; color: #8798B0;".to_string()
                                 };
-                                priority.set(prio);
-                            },
-                            option { value: "Low", "Low" }
-                            option { value: "Mid", "Medium" }
-                            option { value: "High", "High" }
-                            option { value: "Urgent", "Urgent" }
+                                let ring_class = if is_active {
+                                    "ring-1 ring-white/20 font-semibold"
+                                } else {
+                                    "hover:bg-[#22252A] font-medium"
+                                };
+
+                                rsx! {
+                                    button {
+                                        key: "{p}",
+                                        class: "py-2 px-2.5 rounded-[5px] text-xs border transition-all cursor-pointer text-center flex items-center justify-center gap-1.5 {ring_class}",
+                                        style: "{style_str}",
+                                        r#type: "button",
+                                        onclick: move |_| priority.set(p.clone()),
+                                        span { "{p}" }
+                                    }
+                                }
+                            })
                         }
                     }
                 }

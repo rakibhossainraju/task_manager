@@ -81,28 +81,26 @@ impl BoardState {
         let current_group_id = self.groups[source_g_idx].id;
 
         // If target_group_id is specified and differs from current group
-        if let Some(target_gid) = target_group_id {
-            if target_gid != current_group_id {
-                let target_exists = self.groups.iter().any(|g| g.id == target_gid);
-                if !target_exists {
-                    return Err("Target group not found");
-                }
-
-                let mut task = self.groups[source_g_idx].tasks.remove(source_t_idx);
-                task.title = trimmed_title.to_string();
-                task.description = description;
-                task.priority = priority;
-                task.updated_at = Some(Local::now());
-
-                let target_group = self
-                    .groups
-                    .iter_mut()
-                    .find(|g| g.id == target_gid)
-                    .expect("target group confirmed to exist");
-
-                target_group.tasks.push(task);
-                return Ok(());
+        if let Some(target_gid) = target_group_id.filter(|&id| id != current_group_id) {
+            let target_exists = self.groups.iter().any(|g| g.id == target_gid);
+            if !target_exists {
+                return Err("Target group not found");
             }
+
+            let mut task = self.groups[source_g_idx].tasks.remove(source_t_idx);
+            task.title = trimmed_title.to_string();
+            task.description = description;
+            task.priority = priority;
+            task.updated_at = Some(Local::now());
+
+            let target_group = self
+                .groups
+                .iter_mut()
+                .find(|g| g.id == target_gid)
+                .expect("target group confirmed to exist");
+
+            target_group.tasks.push(task);
+            return Ok(());
         }
 
         // Otherwise update in-place
@@ -153,10 +151,10 @@ impl BoardState {
         };
 
         // If target_task_id is specified, verify it exists in target_group
-        if let Some(target_tid) = target_task_id {
-            if !target_group.tasks.iter().any(|t| t.id == target_tid) {
-                return false;
-            }
+        if let Some(target_tid) = target_task_id
+            && !target_group.tasks.iter().any(|t| t.id == target_tid)
+        {
+            return false;
         }
 
         let mut task = self.groups[source_g_idx].tasks.remove(source_t_idx);
@@ -513,12 +511,14 @@ mod tests {
         let moved = board.groups[1].tasks.iter().find(|t| t.id == task_id).unwrap();
         assert_eq!(moved.title, "Moved Task");
         assert_eq!(moved.priority, TaskPriority::High);
+        assert!(moved.updated_at.is_some());
     }
 
     #[test]
     fn test_update_task_validation_and_errors() {
         let mut board = BoardState::new();
         let task_id = board.groups[0].tasks[0].id;
+        let original_title = board.groups[0].tasks[0].title.clone();
         let fake_id = Uuid::new_v4();
 
         // Empty title
@@ -530,6 +530,7 @@ mod tests {
             None,
         );
         assert!(empty_res.is_err());
+        assert_eq!(board.groups[0].tasks[0].title, original_title);
 
         // Nonexistent task
         let fake_task_res = board.update_task(
@@ -550,5 +551,6 @@ mod tests {
             Some(fake_id),
         );
         assert!(fake_group_res.is_err());
+        assert_eq!(board.groups[0].tasks[0].title, original_title);
     }
 }
