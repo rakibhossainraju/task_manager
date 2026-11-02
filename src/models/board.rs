@@ -181,26 +181,40 @@ mod tests {
     fn test_search_filtering() {
         let mut board = BoardState::new();
         let group_id = board.groups[0].id;
+        let total_initial = board.groups[0].tasks.len();
+
         board
             .add_task(
                 group_id,
                 "UniqueSearchKeyword".to_string(),
-                None,
+                Some("Special Description Text".to_string()),
                 TaskPriority::Urgent,
             )
             .unwrap();
 
-        board.set_search_query("uniquesearch".to_string());
-        let filtered = board.filtered_tasks(group_id);
-        assert_eq!(filtered.len(), 1);
-        assert_eq!(filtered[0].title, "UniqueSearchKeyword");
+        // Title substring match (case-insensitive)
+        board.set_search_query("  uNiQuEsEaRcH  ".to_string());
+        let filtered_title = board.filtered_tasks(group_id);
+        assert_eq!(filtered_title.len(), 1);
+        assert_eq!(filtered_title[0].title, "UniqueSearchKeyword");
 
-        // Filter by priority
-        board.set_search_query("urgent".to_string());
+        // Description substring match
+        board.set_search_query("description text".to_string());
+        let filtered_desc = board.filtered_tasks(group_id);
+        assert_eq!(filtered_desc.len(), 1);
+        assert_eq!(filtered_desc[0].title, "UniqueSearchKeyword");
+
+        // Priority name match
+        board.set_search_query("URGENT".to_string());
         let filtered_prio = board.filtered_tasks(group_id);
         assert!(filtered_prio.iter().any(|t| t.title == "UniqueSearchKeyword"));
 
-        // No match
+        // Empty query returns all tasks in group
+        board.set_search_query("   ".to_string());
+        let filtered_all = board.filtered_tasks(group_id);
+        assert_eq!(filtered_all.len(), total_initial + 1);
+
+        // No match returns empty
         board.set_search_query("nonexistentxyz123".to_string());
         let filtered_none = board.filtered_tasks(group_id);
         assert_eq!(filtered_none.len(), 0);

@@ -38,6 +38,7 @@ impl TaskPriority {
         }
     }
 
+    #[allow(dead_code)]
     pub fn toggle_priority(&self) -> TaskPriority {
         match self {
             TaskPriority::Low => TaskPriority::Medium,
